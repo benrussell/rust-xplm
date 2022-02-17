@@ -117,7 +117,7 @@ impl Window {
             handleCursorFunc: Some(window_cursor),
             handleMouseWheelFunc: Some(window_scroll),
             refcon: window_ptr as *mut _,
-            decorateAsFloatingWindow: 0,
+            decorateAsFloatingWindow: 1,
             layer: xplm_sys::xplm_WindowLayerFloatingWindows as _,
             handleRightClickFunc: None,
         };
@@ -162,6 +162,10 @@ impl Window {
         unsafe {
             xplm_sys::XPLMSetWindowIsVisible(self.id, visible as _);
         }
+    }
+
+    pub fn is_popped_out(&self) -> bool {
+        1 == unsafe { xplm_sys::XPLMWindowIsPoppedOut(self.id)}
     }
 }
 
@@ -703,4 +707,24 @@ impl ScrollEvent {
     pub fn scroll_y(&self) -> i32 {
         self.scroll_y
     }
+}
+
+pub fn get_screen_bounds_global() -> Rect<i32>{
+        unsafe {
+            let mut left = 0;
+            let mut top = 0;
+            let mut right = 0;
+            let mut bottom = 0;
+            xplm_sys::XPLMGetScreenBoundsGlobal(&mut left, &mut top, &mut right, &mut bottom);
+            Rect::from_left_top_right_bottom(left, top, right, bottom)
+        }
+}
+
+pub fn get_mouse_location_global() -> (i32, i32){
+        unsafe {
+            let mut x = 0;
+            let mut y = 0;
+            xplm_sys::XPLMGetMouseLocationGlobal(&mut x, &mut y);
+            (x,y)
+        }
 }

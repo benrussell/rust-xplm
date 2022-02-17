@@ -1,6 +1,9 @@
 use std::ffi::CString;
 use std::os::raw::c_char;
+use std::panic::{self, PanicInfo};
 use std::ptr;
+
+use crate::debugln;
 
 /// Copies up to 256 bytes (including null termination) to
 /// the provided destination. If the provided source string is too long, it will be
@@ -16,5 +19,24 @@ pub unsafe fn copy_to_c_buffer(mut src: String, dest: *mut c_char) {
 
 /// Performs initialization required for the XPLM crate to work correctly
 pub fn xplm_init() {
+    panic::set_hook(Box::new(panic_hook));
     super::paths::path_init();
+}
+
+fn panic_hook(panic_info: &PanicInfo) {
+    if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
+        debugln!("panic occurred: {:?}", s);
+    } else {
+        debugln!("panic occurred");
+    }
+
+    if let Some(location) = panic_info.location() {
+        debugln!(
+            "panic occurred in file '{}' at line {}",
+            location.file(),
+            location.line(),
+        );
+    } else {
+        debugln!("panic occurred but can't get location information...");
+    }
 }
