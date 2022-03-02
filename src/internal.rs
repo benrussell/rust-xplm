@@ -24,19 +24,5 @@ pub fn xplm_init() {
 }
 
 fn panic_hook(panic_info: &PanicInfo) {
-    if let Some(s) = panic_info.payload().downcast_ref::<&str>() {
-        debugln!("panic occurred: {:?}", s);
-    } else {
-        debugln!("panic occurred");
-    }
-
-    if let Some(location) = panic_info.location() {
-        debugln!(
-            "panic occurred in file '{}' at line {}",
-            location.file(),
-            location.line(),
-        );
-    } else {
-        debugln!("panic occurred but can't get location information...");
-    }
+    debugln!("Rust Plugin {panic_info}")
 }
