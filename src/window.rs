@@ -51,6 +51,14 @@ pub trait WindowDelegate: 'static {
     fn mouse_event(&mut self, _window: &Window, _event: MouseEvent) -> bool {
         true
     }
+    /// Handles an event of the right mouse button
+    ///
+    /// Return false to consume the event or true to propagate it.
+    ///
+    /// The default implementation does nothing and allows the event to propagate.
+    fn right_click_event(&mut self, _window: &Window, _event: MouseEvent) -> bool {
+        true
+    }
     /// Handles a scroll event
     ///
     /// Return false to consume the event or true to propagate it.
@@ -82,8 +90,8 @@ impl Deref for WindowRef {
 
 /// A basic window that may appear on the screen
 ///
-/// A window has a position and size, but no appearance. Plugins must draw in their draw callbacks
-/// to make windows appear.
+/// A window always has a position and size. The appearence can be customized by changing the WindowOptions. 
+/// Plugins must draw in their draw callbacks to actually show something inside their windows.
 pub struct Window {
     /// The window ID
     id: xplm_sys::XPLMWindowID,
@@ -95,7 +103,7 @@ impl Window {
     /// Creates a new window with the provided geometry and returns a reference to it
     ///
     /// The window is originally not visible.
-    pub fn new<R: Into<Rect<i32>>, D: WindowDelegate>(geometry: R, delegate: D) -> WindowRef {
+    pub fn new<R: Into<Rect<i32>>, D: WindowDelegate>(geometry: R, delegate: D, options: WindowOptions) -> WindowRef {
         let geometry = geometry.into();
 
         let mut window_box = Box::new(Window {
@@ -110,16 +118,16 @@ impl Window {
             top: geometry.top(),
             right: geometry.right(),
             bottom: geometry.bottom(),
-            visible: 0,
+            visible: if options.visible {1} else {0},
             drawWindowFunc: Some(window_draw),
             handleMouseClickFunc: Some(window_mouse),
             handleKeyFunc: Some(window_key),
             handleCursorFunc: Some(window_cursor),
             handleMouseWheelFunc: Some(window_scroll),
             refcon: window_ptr as *mut _,
-            decorateAsFloatingWindow: 1,
-            layer: xplm_sys::xplm_WindowLayerFloatingWindows as _,
-            handleRightClickFunc: None,
+            decorateAsFloatingWindow: options.decoration.to_xplm(),
+            layer: options.layer.to_xplm(),
+            handleRightClickFunc: Some(window_right_mouse),
         };
 
         let window_id = unsafe { xplm_sys::XPLMCreateWindowEx(&mut window_info) };
@@ -185,6 +193,58 @@ impl Drop for Window {
     }
 }
 
+/// Decoration of an XPLM Window. See XPLM Docs for details. Default is `RoundRectangle`
+pub enum WindowDecoration {
+    None, RoundRectangle, SelfDecorated, SelfDecoratedResizable,
+}
+
+impl WindowDecoration {
+    fn to_xplm(&self) -> xplm_sys::XPLMWindowDecoration {
+        match self {
+            WindowDecoration::None => xplm_sys::xplm_WindowDecorationNone as _,
+            WindowDecoration::RoundRectangle => xplm_sys::xplm_WindowDecorationRoundRectangle as _,
+            WindowDecoration::SelfDecorated => xplm_sys::xplm_WindowDecorationSelfDecorated as _,
+            WindowDecoration::SelfDecoratedResizable => xplm_sys::xplm_WindowDecorationSelfDecoratedResizable as _
+        }
+    }
+}
+
+impl Default for WindowDecoration {
+    fn default() -> Self {
+        Self::RoundRectangle
+    }
+}
+
+/// Layer of an XPLM Window. See XPLM Docs for details. Default is `RoundRectangle`
+pub enum WindowLayer {
+    FlightOverlay, FloatingWindows, Modal, GrowlNotifications,
+}
+
+impl WindowLayer {
+    fn to_xplm(&self) -> xplm_sys::XPLMWindowLayer {
+        match self {
+            WindowLayer::FlightOverlay => xplm_sys::xplm_WindowLayerFlightOverlay as _,
+            WindowLayer::FloatingWindows => xplm_sys::xplm_WindowLayerFloatingWindows as _,
+            WindowLayer::Modal => xplm_sys::xplm_WindowLayerModal as _,
+            WindowLayer::GrowlNotifications => xplm_sys::xplm_WindowLayerGrowlNotifications as _
+        }
+    }
+}
+
+impl Default for WindowLayer {
+    fn default() -> Self {
+        Self::FloatingWindows
+    }
+}
+
+#[derive(Default)]
+pub struct WindowOptions {
+    pub visible: bool,
+    pub decoration: WindowDecoration,
+    pub layer: WindowLayer,
+}
+
+
 /// Callback in which windows are drawn
 unsafe extern "C" fn window_draw(_window: xplm_sys::XPLMWindowID, refcon: *mut c_void) {
     let window = refcon as *mut Window;
@@ -211,6 +271,29 @@ unsafe extern "C" fn window_key(
 
 /// Mouse callback
 unsafe extern "C" fn window_mouse(
+    _window: xplm_sys::XPLMWindowID,
+    x: c_int,
+    y: c_int,
+    status: xplm_sys::XPLMMouseStatus,
+    refcon: *mut c_void,
+) -> c_int {
+    let window = refcon as *mut Window;
+    if let Some(action) = MouseAction::from_xplm(status) {
+        let position = Point::from((x, y));
+        let event = MouseEvent::new(position, action);
+        let propagate = (*window).delegate.mouse_event(&*window, event);
+        if propagate {
+            0
+        } else {
+            1
+        }
+    } else {
+        // Propagate
+        0
+    }
+}
+/// Right mouse callback
+unsafe extern "C" fn window_right_mouse(
     _window: xplm_sys::XPLMWindowID,
     x: c_int,
     y: c_int,
