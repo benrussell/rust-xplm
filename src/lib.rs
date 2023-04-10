@@ -21,6 +21,10 @@ mod internal;
 pub mod command;
 /// Datarefs
 pub mod data;
+
+// Low-level dataref access
+pub mod dref;
+
 /// Low-level drawing callbacks
 pub mod draw;
 /// Error detection
