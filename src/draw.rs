@@ -225,24 +225,24 @@ pub struct DrawStringColor {
 }
 
 impl DrawStringColor{
-    fn get_array( &self ) -> [f32; 3]{
+    fn as_array( &self ) -> [f32; 3]{
         [self.red, self.green, self.blue]
     }
 }
 
 /// Font ID is forced to XPSDK proportional font.
 pub fn draw_string( 
-    color: DrawStringColor, 
+    color: &DrawStringColor, 
     left: i32, bottom: i32, 
     value: &str,  
     word_wrap_width: i32
 ) -> Result<(), NulError> {
 
     let value_c = CString::new(value)?;
-    
+     
     unsafe{
         xplm_sys::XPLMDrawString( 
-            color.get_array().as_ptr() as *mut f32,
+            color.as_array().as_ptr() as *mut f32,
             left, 
             bottom, 
             value_c.as_bytes_with_nul().as_ptr() as *mut i8,
