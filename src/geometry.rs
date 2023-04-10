@@ -71,7 +71,7 @@ impl<N> Rect<N> {
     }
 }
 
-impl<N: Clone> Rect<N> {
+impl<N: Clone + std::ops::Sub + std::ops::Sub<Output = N>> Rect<N> {
     pub fn top(&self) -> N {
         self.top.clone()
     }
@@ -83,6 +83,12 @@ impl<N: Clone> Rect<N> {
     }
     pub fn right(&self) -> N {
         self.right.clone()
+    }
+    pub fn width(&self) -> N{
+        self.right.clone() - self.left.clone()
+    }
+    pub fn height(&self) -> N{
+        self.top.clone() - self.bottom.clone()
     }
 }
 
