@@ -195,3 +195,60 @@ pub fn generate_texture_number() -> i32 {
     generate_texture_numbers(&mut [number]);
     number
 }
+
+
+// FIXME: Prototype wrapper. Probably needs refactor to be more idiomatic.
+pub struct DarkBoxBounds{
+    pub left: i32,
+    pub bottom: i32,
+    pub top: i32,
+    pub right: i32
+}
+
+pub fn draw_translucent_dark_box( bounds: DarkBoxBounds ){
+    unsafe{
+        xplm_sys::XPLMDrawTranslucentDarkBox( bounds.left, bounds.top, bounds.right, bounds.bottom );
+    }
+}
+
+
+
+// FIXME: Prototype wrapper. Probably needs refactor to be more idiomatic.
+
+pub struct DrawStringColor {
+    pub red: f32,
+    pub green: f32,
+    pub blue: f32,
+    //a: f32,
+}
+
+impl DrawStringColor{
+    fn get_array( &self ) -> [f32; 3]{
+        [self.red, self.green, self.blue]
+    }
+}
+
+//use crate::geometry;
+pub fn draw_string( 
+    color: DrawStringColor, 
+    left: i32,
+    bottom: i32, 
+    value: &str,  
+    word_wrap_width: i32
+    // font ID is forced to only sane default.
+){
+
+    let color_array: [f32; 3] = color.get_array();
+    
+    unsafe{
+        xplm_sys::XPLMDrawString( 
+            color_array.as_ptr() as *mut f32,
+            left, 
+            bottom, 
+            value.as_ptr() as *mut i8, 
+            word_wrap_width as *mut i32,
+            xplm_sys::xplmFont_Proportional as i32,             
+        );
+    }
+
+}
