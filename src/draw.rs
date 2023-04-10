@@ -1,6 +1,8 @@
 use std::os::raw::*;
 use xplm_sys;
 
+use std::ffi::{CString, NulError};
+
 /// A callback that can be called while X-Plane draws graphics
 pub trait DrawCallback: 'static {
     /// Draws
@@ -228,27 +230,27 @@ impl DrawStringColor{
     }
 }
 
-//use crate::geometry;
+/// Font ID is forced to XPSDK proportional font.
 pub fn draw_string( 
     color: DrawStringColor, 
-    left: i32,
-    bottom: i32, 
+    left: i32, bottom: i32, 
     value: &str,  
     word_wrap_width: i32
-    // font ID is forced to only sane default.
-){
+) -> Result<(), NulError> {
 
-    let color_array: [f32; 3] = color.get_array();
+    let value_c = CString::new(value)?;
     
     unsafe{
         xplm_sys::XPLMDrawString( 
-            color_array.as_ptr() as *mut f32,
+            color.get_array().as_ptr() as *mut f32,
             left, 
             bottom, 
-            value.as_ptr() as *mut i8, 
+            value_c.as_bytes_with_nul().as_ptr() as *mut i8,
             word_wrap_width as *mut i32,
             xplm_sys::xplmFont_Proportional as i32,             
         );
     }
+
+    Ok(())
 
 }
