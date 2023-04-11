@@ -1,3 +1,5 @@
+//use crate::debugln;
+
 /// Accessing and communicating with other plugins
 pub mod management;
 
@@ -54,7 +56,7 @@ pub trait Plugin: Sized {
     fn receive_message(&mut self,
         from: u32,
         message: u32,
-        param: *mut ::std::os::raw::c_void){}
+        param: *mut ::std::os::raw::c_void);
         
     /// Called for messages from X-Plane.
     ///
@@ -62,7 +64,6 @@ pub trait Plugin: Sized {
     #[allow(unused_variables)]        
     fn receive_xplane_message(&mut self,
         message: u32,
-        param: *mut ::std::os::raw::c_void){} 
-
-
+        param: *mut ::std::os::raw::c_void);
+            
 }
