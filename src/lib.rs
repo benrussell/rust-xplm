@@ -38,6 +38,10 @@ pub mod flight_loop;
 pub mod geometry;
 /// User interface menus
 pub mod menu;
+
+/// XPLMSendMessage and RX Message functions.
+pub mod messages;
+
 /// Plugin creation and management
 pub mod plugin;
 /// Relatively low-level windows

@@ -134,3 +134,40 @@ where
         }
     }
 }
+
+/// Implements the XPluginReceiveMessage callback
+///
+/// This function never unwinds. It catches any unwind that may occur.
+pub unsafe fn xplugin_receive_message<P>(
+    data: &mut PluginData<P>, 
+    from: ::std::os::raw::c_int,
+    message: ::std::os::raw::c_int,
+    param: *mut ::std::os::raw::c_void
+    )
+where
+    P: Plugin,
+{
+    if !data.panicked {
+        let unwind = panic::catch_unwind(AssertUnwindSafe(|| {
+            
+            let plugin = &mut (*data.plugin);
+
+            let from: u32 = from as u32;
+            let message: u32 = message as u32;
+            
+            if from == 0 {
+                // X-Plane messages
+                plugin.receive_xplane_message(message, param);
+            }else{
+                // Plugin messages
+                plugin.receive_message(from, message, param);
+            }
+
+
+        }));
+        if unwind.is_err() {
+            eprintln!("Panic in XPluginDisable");
+            data.panicked = true;
+        }
+    }
+}

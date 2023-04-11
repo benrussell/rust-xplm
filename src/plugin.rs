@@ -36,6 +36,7 @@ pub trait Plugin: Sized {
     fn enable(&mut self) -> Result<(), Self::Error> {
         Ok(())
     }
+
     /// Called when the plugin is disabled
     ///
     /// The default implementation does nothing.
@@ -45,4 +46,23 @@ pub trait Plugin: Sized {
     ///
     /// The default implementation does nothing.
     fn stop(&mut self){}
+
+    /// Called for messages from other plugins.
+    ///
+    /// The default implementation does nothing.
+    #[allow(unused_variables)]        
+    fn receive_message(&mut self,
+        from: u32,
+        message: u32,
+        param: *mut ::std::os::raw::c_void){}
+        
+    /// Called for messages from X-Plane.
+    ///
+    /// The default implementation does nothing.
+    #[allow(unused_variables)]        
+    fn receive_xplane_message(&mut self,
+        message: u32,
+        param: *mut ::std::os::raw::c_void){} 
+
+
 }
