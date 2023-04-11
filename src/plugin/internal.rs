@@ -77,6 +77,7 @@ where
 {
     if !data.panicked {
         let unwind = panic::catch_unwind(AssertUnwindSafe(|| {
+            (*data.plugin).stop();
             let plugin = Box::from_raw(data.plugin);
             data.plugin = ptr::null_mut();
             drop(plugin);

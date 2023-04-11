@@ -24,6 +24,10 @@ pub trait Plugin: Sized {
     ///
     /// On success, returns a plugin object
     fn start() -> Result<Self, Self::Error>;
+
+    /// Returns information on this plugin
+    fn info(&self) -> PluginInfo;
+
     /// Called when the plugin is enabled
     ///
     /// If this function returns an Err, the plugin will remain disabled.
@@ -37,6 +41,8 @@ pub trait Plugin: Sized {
     /// The default implementation does nothing.
     fn disable(&mut self) {}
 
-    /// Returns information on this plugin
-    fn info(&self) -> PluginInfo;
+    /// Called when the plugin is disabled
+    ///
+    /// The default implementation does nothing.
+    fn stop(&mut self){}
 }
