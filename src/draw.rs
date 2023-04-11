@@ -164,9 +164,9 @@ pub fn set_state(state: &GraphicsState) {
 /// Binds a texture ID to a texture number
 ///
 /// This function should be used instead of glBindTexture
-pub fn bind_texture(texture_number: i32, texture_id: i32) {
+pub fn bind_texture(texture_number: i32, texture_unit: i32) {
     unsafe {
-        xplm_sys::XPLMBindTexture2d(texture_number, texture_id);
+        xplm_sys::XPLMBindTexture2d(texture_number, texture_unit);
     }
 }
 

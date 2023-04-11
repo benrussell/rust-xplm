@@ -61,7 +61,7 @@ where
         }
     }));
     unwind.unwrap_or_else(|_| {
-        eprintln!("Panic in XPluginStart");
+        debugln!("Panic in XPluginStart");
         data.panicked = true;
         data.plugin = ptr::null_mut();
         0
