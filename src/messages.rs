@@ -1,6 +1,7 @@
+use crate::debugln;
 
 
-pub enum XPlaneMessage{
+enum XPlaneMessage{
     PlaneCrashed,
     PlaneLoaded,
     AirportLoaded,
@@ -40,17 +41,7 @@ impl XPlaneMessage{
 }
 
 
-pub trait MessageCallback {
-
-    #[allow(unused_variables)]        
-    fn receive_message(&mut self,
-        from: u32,
-        message: u32,
-        param: *mut ::std::os::raw::c_void){
-
-        // Will not RX messages from X-Plane.
-        
-    }
+pub trait MessageCallback: crate::plugin::Plugin {
 
     #[allow(unused_variables)]        
     fn receive_xplane_message(&mut self,
@@ -58,9 +49,11 @@ pub trait MessageCallback {
         message: u32, // used to filted into sub functions
         param: *mut ::std::os::raw::c_void){
 
+        //debugln!("trait MessageCallback rx xplane message");
+
         match XPlaneMessage::from_xplm(message){
             Some(XPlaneMessage::PlaneCrashed) => self.msg_plane_crashed(),
-            Some(XPlaneMessage::PlaneLoaded) => self.msg_plane_loaded(),
+            Some(XPlaneMessage::PlaneLoaded) => self.msg_plane_loaded(param as u32),
             Some(XPlaneMessage::AirportLoaded) => self.msg_airport_loaded(),
             Some(XPlaneMessage::SceneryLoaded) => self.msg_scenery_loaded(),
             Some(XPlaneMessage::AirplaneCountChanged) => self.msg_airplane_count_changed(),
@@ -85,7 +78,8 @@ pub trait MessageCallback {
         // param ignored
     }
 
-    fn msg_plane_loaded(&mut self){
+    #[allow(unused_variables)]
+    fn msg_plane_loaded(&mut self, param: u32){
         // param is index of plane being loaded
     }
 
@@ -133,6 +127,7 @@ pub trait MessageCallback {
     }
 
     fn msg_release_planes(&mut self){
+        //multiplayer interop function..
         // param ignored
     }
 
