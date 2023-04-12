@@ -153,8 +153,8 @@ where
             let plugin = &mut (*data.plugin);
 
             //convert c_int to u32 types
-            let from: u32 = from as u32;
-            let message: u32 = message as u32;
+            let from: xplm_sys::XPLMPluginID = from as xplm_sys::XPLMPluginID;
+            let message: i32 = message as i32;
 
             //debugln!("----------------");
             //debugln!("rust-xplm: rx message raw: from: {}, message: {}, param: {:?}", from, message, param as u32);

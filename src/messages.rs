@@ -23,8 +23,8 @@ enum XPlaneMessage{
 }
 
 impl XPlaneMessage{
-    fn from_xplm( xplm_msg: u32 ) -> Option<Self>{
-        match xplm_msg as u32{
+    fn from_xplm( xplm_msg: i32 ) -> Option<Self>{
+        match xplm_msg as u32{ //FIXME: SDK bindgen is giving us u32 but function sig for RX messages gives us i32
             xplm_sys::XPLM_MSG_PLANE_CRASHED => Some(XPlaneMessage::PlaneCrashed),
             xplm_sys::XPLM_MSG_PLANE_LOADED => Some(XPlaneMessage::PlaneLoaded),
             xplm_sys::XPLM_MSG_AIRPORT_LOADED => Some(XPlaneMessage::AirportLoaded),
@@ -49,8 +49,8 @@ pub trait XPlaneMessageFilter: crate::plugin::Plugin {
 
     #[allow(unused_variables)]        
     fn rx_xplane_message(&mut self,
-        //from: u32, //always from X-Plane
-        message: u32, // used to filted into sub functions
+        //from: xplm_sys::XPLMPluginID, //always from X-Plane
+        message: i32, // used to filted into sub functions
         param: *mut ::std::os::raw::c_void){
 
         //debugln!("trait MessageCallback rx xplane message");
