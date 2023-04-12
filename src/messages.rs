@@ -1,5 +1,9 @@
-use crate::debugln;
+//use crate::debugln;
 
+use crate::data;
+use crate::data::borrowed; //::{DataRef, FindError};
+use crate::data::{DataRead, StringRead};
+//use crate::data::{ArrayRead, DataRead, ReadOnly, ReadWrite, StringRead};
 
 enum XPlaneMessage{
     PlaneCrashed,
@@ -41,10 +45,10 @@ impl XPlaneMessage{
 }
 
 
-pub trait MessageCallback: crate::plugin::Plugin {
+pub trait XPlaneMessageFilter: crate::plugin::Plugin {
 
     #[allow(unused_variables)]        
-    fn receive_xplane_message(&mut self,
+    fn rx_xplane_message(&mut self,
         //from: u32, //always from X-Plane
         message: u32, // used to filted into sub functions
         param: *mut ::std::os::raw::c_void){
@@ -59,7 +63,7 @@ pub trait MessageCallback: crate::plugin::Plugin {
             Some(XPlaneMessage::AirplaneCountChanged) => self.msg_airplane_count_changed(),
             Some(XPlaneMessage::PlaneUnloaded) => self.msg_plane_unloaded(param as u32),
             Some(XPlaneMessage::WillWritePrefs) => self.msg_will_write_prefs(),
-            Some(XPlaneMessage::LiveryLoaded) => self.msg_livery_loaded(param as u32),
+            Some(XPlaneMessage::LiveryLoaded) => self.prepare_msg_livery_loaded(param as u32),
             Some(XPlaneMessage::EnteredVR) => self.msg_entered_vr(),
             Some(XPlaneMessage::ExitingVR) => self.msg_exiting_vr(),
             Some(XPlaneMessage::ReleasePlanes) => self.msg_release_planes(),
@@ -111,12 +115,29 @@ pub trait MessageCallback: crate::plugin::Plugin {
         // param ignored
     }
 
+    
     #[allow(unused_variables)]
-    fn msg_livery_loaded(&mut self, param: u32){
+    // This function retrieves the livery data as strings from the X-Plane datarefs.
+    fn prepare_msg_livery_loaded(&mut self, param: u32){
         // This message is sent to your plugin right after a livery is loaded for an airplane. 
         // You can use this to check the new livery (via datarefs) and react accordingly. 
         // The parameter contains the index number of the aircraft whose livery is changing.
+
+            //sim/aircraft/view/acf_livery_index int
+            //sim/aircraft/view/acf_livery_path byte[1024]
+
+            let dref_livery_index: borrowed::DataRef<u32, data::ReadOnly> = borrowed::DataRef::find("sim/aircraft/view/acf_livery_index").expect("bad dref: livery index");            
+            let dref_livery_path: borrowed::DataRef<[u8], data::ReadOnly> = borrowed::DataRef::find("sim/aircraft/view/acf_livery_path").expect("bad dref: livery path");
+
+            let livery_index: u32 = dref_livery_index.get();
+            let livery_path: String = dref_livery_path.get_as_string().unwrap_or(String::from("Rust Error: bad livery data."));
+
+        self.msg_livery_loaded( param, livery_index, &livery_path );
     }
+
+    fn msg_livery_loaded(&mut self, param: u32, livery_index: u32, livery_path: &str);
+
+
 
     fn msg_entered_vr(&mut self){
         // param ignored

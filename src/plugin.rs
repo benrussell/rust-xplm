@@ -53,7 +53,7 @@ pub trait Plugin: Sized {
     ///
     /// The default implementation does nothing.
     #[allow(unused_variables)]        
-    fn receive_message(&mut self,
+    fn rx_message(&mut self,
         from: u32,
         message: u32,
         param: *mut ::std::os::raw::c_void);
@@ -62,7 +62,7 @@ pub trait Plugin: Sized {
     ///
     /// The default implementation does nothing.
     #[allow(unused_variables)]        
-    fn receive_xplane_message(&mut self,
+    fn rx_xplane_message(&mut self,
         message: u32,
         param: *mut ::std::os::raw::c_void);
             

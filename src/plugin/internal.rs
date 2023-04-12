@@ -152,15 +152,20 @@ where
             
             let plugin = &mut (*data.plugin);
 
+            //convert c_int to u32 types
             let from: u32 = from as u32;
             let message: u32 = message as u32;
-            
+
+            //debugln!("----------------");
+            //debugln!("rust-xplm: rx message raw: from: {}, message: {}, param: {:?}", from, message, param as u32);
+            //debugln!("----------------");
+
             if from == 0 {
                 // X-Plane messages
-                plugin.receive_xplane_message(message, param);
+                plugin.rx_xplane_message(message, param);
             }else{
                 // Plugin messages
-                plugin.receive_message(from, message, param);
+                plugin.rx_message(from, message, param);
             }
 
 
