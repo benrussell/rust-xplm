@@ -5,6 +5,9 @@ use std::ptr;
 
 use xplm_sys;
 
+//use std::ffi::{CString, NulError};
+use std::ffi::{CString};
+
 use super::geometry::{Point, Rect};
 
 /// Cursor states that windows can apply
@@ -133,6 +136,18 @@ impl Window {
         let window_id = unsafe { xplm_sys::XPLMCreateWindowEx(&mut window_info) };
         window_box.id = window_id;
 
+        match options.title{
+            Some(title) => unsafe { 
+                let value_c = CString::new(title).expect("Invalid title."); //FIXME: better error handler
+                xplm_sys::XPLMSetWindowTitle(
+                    window_id, 
+                    value_c.as_bytes_with_nul().as_ptr() as *mut i8 
+                );  
+                }
+            None => {}
+        }
+
+
         WindowRef { window: window_box }
     }
 
@@ -242,6 +257,7 @@ pub struct WindowOptions {
     pub visible: bool,
     pub decoration: WindowDecoration,
     pub layer: WindowLayer,
+    pub title: Option<String>,
 }
 
 
