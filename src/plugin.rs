@@ -57,13 +57,5 @@ pub trait Plugin: Sized {
         from: xplm_sys::XPLMPluginID,
         message: i32,
         param: *mut ::std::os::raw::c_void);
-        
-    /// Called for messages from X-Plane.
-    ///
-    /// The default implementation does nothing.
-    #[allow(unused_variables)]        
-    fn rx_xplane_message(&mut self,
-        message: i32,
-        param: *mut ::std::os::raw::c_void);
-            
+    
 }

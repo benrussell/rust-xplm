@@ -151,23 +151,11 @@ where
         let unwind = panic::catch_unwind(AssertUnwindSafe(|| {
             
             let plugin = &mut (*data.plugin);
-
-            //convert c_int to u32 types
+            
             let from: xplm_sys::XPLMPluginID = from as xplm_sys::XPLMPluginID;
             let message: i32 = message as i32;
-
-            //debugln!("----------------");
-            //debugln!("rust-xplm: rx message raw: from: {}, message: {}, param: {:?}", from, message, param as u32);
-            //debugln!("----------------");
-
-            if from == 0 {
-                // X-Plane messages
-                plugin.rx_xplane_message(message, param);
-            }else{
-                // Plugin messages
-                plugin.rx_message(from, message, param);
-            }
-
+            
+            plugin.rx_message(from, message, param);        
 
         }));
         if unwind.is_err() {

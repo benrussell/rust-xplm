@@ -48,8 +48,8 @@ impl XPlaneMessage{
 pub trait XPlaneMessageFilter: crate::plugin::Plugin {
 
     #[allow(unused_variables)]        
-    fn rx_xplane_message(&mut self,
-        //from: xplm_sys::XPLMPluginID, //always from X-Plane
+    fn rx_message(&mut self,
+        from: xplm_sys::XPLMPluginID, //always from X-Plane
         message: i32, // used to filted into sub functions
         param: *mut ::std::os::raw::c_void){
 
@@ -172,3 +172,6 @@ pub trait XPlaneMessageFilter: crate::plugin::Plugin {
 
 
 }
+
+
+
