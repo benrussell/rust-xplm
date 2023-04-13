@@ -56,6 +56,6 @@ pub trait Plugin: Sized {
     fn rx_message(&mut self,
         from: xplm_sys::XPLMPluginID,
         message: i32,
-        param: *mut ::std::os::raw::c_void);
+        param: *mut ::std::os::raw::c_void){}
     
 }
