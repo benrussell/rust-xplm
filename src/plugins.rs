@@ -9,8 +9,6 @@ use std::ffi::{CString, NulError};
 
 /// Module to allow querying other plugins loaded in X-Plane session.
 
-//FIXME: XPLM_NO_PLUGIN_ID 
-
 pub fn get_my_id() -> xplm_sys::XPLMPluginID{
     unsafe { xplm_sys::XPLMGetMyID() }
 }
@@ -19,18 +17,36 @@ pub fn count() -> i32{
     unsafe { xplm_sys::XPLMCountPlugins() }
 }
 
-pub fn get_nth( index: i32 ) -> xplm_sys::XPLMPluginID{
-    unsafe { xplm_sys::XPLMGetNthPlugin(index) }
+pub fn get_nth( index: i32 ) -> Option<xplm_sys::XPLMPluginID>{
+    let ret: xplm_sys::XPLMPluginID = unsafe { xplm_sys::XPLMGetNthPlugin(index) };
+
+    if ret == xplm_sys::XPLM_NO_PLUGIN_ID{
+        None
+    }else{
+        Some( ret )
+    }
 }
 
-pub fn find_by_path( path: &str ) -> xplm_sys::XPLMPluginID{
+pub fn find_by_path( path: &str ) -> Option<xplm_sys::XPLMPluginID>{
     let path_c = std::ffi::CString::new(path).unwrap(); //FIXME: unwrap!
-    unsafe { xplm_sys::XPLMFindPluginByPath(path_c.as_ptr()) }
+    let ret: xplm_sys::XPLMPluginID = unsafe { xplm_sys::XPLMFindPluginByPath(path_c.as_ptr()) };
+
+    if ret == xplm_sys::XPLM_NO_PLUGIN_ID{
+        None
+    }else{
+        Some( ret )
+    }
 }
 
-pub fn find_by_signature( signature: &str ) -> xplm_sys::XPLMPluginID{
+pub fn find_by_signature( signature: &str ) -> Option<xplm_sys::XPLMPluginID>{
     let signature_c = std::ffi::CString::new(signature).unwrap(); //FIXME: unwrap!
-    unsafe { xplm_sys::XPLMFindPluginBySignature(signature_c.as_ptr()) }
+    let ret: xplm_sys::XPLMPluginID = unsafe { xplm_sys::XPLMFindPluginBySignature(signature_c.as_ptr()) };
+
+    if ret == xplm_sys::XPLM_NO_PLUGIN_ID{
+        None
+    }else{
+        Some( ret )
+    }
 }
 
 
@@ -121,12 +137,10 @@ pub fn reload(){
 }
 
 
-pub fn send_message( plugin_id: xplm_sys::XPLMPluginID, message: i32, param: u32 ){
+pub fn send_message( plugin_id: xplm_sys::XPLMPluginID, message: i32, param: *mut std::os::raw::c_void ){
     unsafe{
-        xplm_sys::XPLMSendMessageToPlugin( plugin_id, message, param as *mut std::os::raw::c_void );
+        xplm_sys::XPLMSendMessageToPlugin( plugin_id, message, param );
     }
-
-    debugln!("plugins::send_message finished.");
 }
 
 
@@ -136,8 +150,6 @@ pub fn send_string( plugin_id: xplm_sys::XPLMPluginID, message: i32, value: &str
     unsafe{
         xplm_sys::XPLMSendMessageToPlugin( plugin_id, message, value_c.as_bytes_with_nul().as_ptr() as *mut std::os::raw::c_void );
     }
-
-    debugln!("plugins::send_string finished.");
 
     Ok(())
 }
