@@ -15,6 +15,8 @@ pub struct PluginInfo {
     pub signature: String,
     /// A description of the plugin
     pub description: String,
+    /// A version number for the plugin
+    pub version: String,
 }
 
 /// The trait that all plugins should implement
@@ -25,10 +27,10 @@ pub trait Plugin: Sized {
     /// Called when X-Plane loads this plugin
     ///
     /// On success, returns a plugin object
-    fn start() -> Result<Self, Self::Error>;
+    fn start( plugin_info: PluginInfo ) -> Result<Self, Self::Error>;
 
     /// Returns information on this plugin
-    fn info(&self) -> PluginInfo;
+    fn info() -> PluginInfo;
 
     /// Called when the plugin is enabled
     ///

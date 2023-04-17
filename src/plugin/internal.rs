@@ -42,13 +42,21 @@ where
 {
     let unwind = panic::catch_unwind(AssertUnwindSafe(|| {
         super::super::internal::xplm_init();
-        match P::start() {
-            Ok(plugin) => {
-                let info = plugin.info();
-                copy_to_c_buffer(info.name, name);
-                copy_to_c_buffer(info.signature, signature);
-                copy_to_c_buffer(info.description, description);
 
+        let info = P::info();
+
+        let fancy_name = format!("{} v{}", info.name, info.version);
+
+        debugln!("{}", fancy_name);
+        debugln!("{}", info.description);
+        //debugln!("{}", info.signature);
+        
+        copy_to_c_buffer(fancy_name, name);
+        copy_to_c_buffer(info.description.clone(), description);
+        copy_to_c_buffer(info.signature.clone(), signature);
+
+        match P::start( info ) {
+            Ok(plugin) => {
                 let plugin_box = Box::new(plugin);
                 data.plugin = Box::into_raw(plugin_box);
                 1
@@ -159,7 +167,7 @@ where
 
         }));
         if unwind.is_err() {
-            eprintln!("Panic in XPluginDisable");
+            eprintln!("Panic in XPluginReceiveMessage");
             data.panicked = true;
         }
     }
