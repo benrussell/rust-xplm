@@ -45,9 +45,6 @@ pub mod messages;
 /// Plugin creation and management
 pub mod plugin;
 
-/// Interaction with other plugins
-pub mod plugins;
-
 /// Relatively low-level windows
 pub mod window;
 

@@ -1,4 +1,4 @@
-use std::ffi::{CStr, CString};
+use std::ffi::{CStr, CString, NulError};
 use std::os::raw::*;
 use std::path::PathBuf;
 use std::ptr;
@@ -16,6 +16,30 @@ pub fn plugin_with_signature(signature: &str) -> Option<Plugin> {
             }
         }
         Err(_) => None,
+    }
+}
+
+/// Looks for a plugin with the provided file path and returns it if it exists
+pub fn plugin_with_path( path: &str ) -> Option<Plugin>{
+    match CString::new(path) {
+        Ok(path) => {
+            let plugin_id = unsafe { xplm_sys::XPLMFindPluginByPath(path.as_ptr()) };
+            if plugin_id != xplm_sys::XPLM_NO_PLUGIN_ID {
+                Some(Plugin(plugin_id))
+            } else {
+                None
+            }
+        }
+        Err(_) => None,
+    }    
+}
+
+/// Get by ID, useful for message RX parsing
+pub fn plugin_with_id( id: xplm_sys::XPLMPluginID ) -> Option<Plugin>{
+    match id as xplm_sys::XPLMPluginID {
+        xplm_sys::XPLM_NO_PLUGIN_ID => None,
+        //xplm_sys::XPLM_PLUGIN_XPLANE => None,
+        _ => Some(Plugin(id)),
     }
 }
 
@@ -37,6 +61,11 @@ pub fn all_plugins() -> Plugins {
         // Subtract 1 because X-Plane is considered a plugin
         count: unsafe { xplm_sys::XPLMCountPlugins() - 1 },
     }
+}
+
+/// Reload all plugins
+pub fn reload_all_plugins(){
+    unsafe { xplm_sys::XPLMReloadPlugins() }
 }
 
 /// An iterator over all loaded plugins
@@ -143,6 +172,23 @@ impl Plugin {
                 xplm_sys::XPLMDisablePlugin(self.0);
             }
         }
+    }
+
+    /// Send a message to this plugin
+    pub fn send_message( &self, message: i32, param: *mut std::os::raw::c_void ){
+        unsafe{
+            xplm_sys::XPLMSendMessageToPlugin( self.0, message, param );
+        }
+    }
+    
+    pub fn send_string( &self, message: i32, value: &str ) -> Result<(), NulError> {
+        let value_c = CString::new(value)?;
+    
+        unsafe{
+            xplm_sys::XPLMSendMessageToPlugin( self.0, message, value_c.as_bytes_with_nul().as_ptr() as *mut std::os::raw::c_void );
+        }
+    
+        Ok(())
     }
 }
 
