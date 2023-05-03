@@ -9,7 +9,7 @@ use std::ffi::CString;
 /// FFI utilities
 mod ffi;
 /// Path conversion
-mod paths;
+pub mod paths;
 /// Plugin macro
 mod plugin_macro;
 
