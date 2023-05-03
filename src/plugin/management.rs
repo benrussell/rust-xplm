@@ -106,6 +106,10 @@ impl ExactSizeIterator for Plugins {}
 pub struct Plugin(xplm_sys::XPLMPluginID);
 
 impl Plugin {
+    /// Returns the raw ID for this plugin
+    pub fn id(&self) -> xplm_sys::XPLMPluginID {
+        self.0
+    }
     /// Returns the name of this plugin
     pub fn name(&self) -> String {
         read_to_buffer(|buffer| unsafe {
