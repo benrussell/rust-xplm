@@ -1,8 +1,8 @@
 
 use ffi::StringBuffer;
 use xplm_sys::XPLMGetSystemPath;
-use std::ffi::{CString, NulError};
-use std::string::FromUtf8Error;
+//use std::ffi::{CString, NulError};
+//use std::string::FromUtf8Error;
 
 use super::feature;
 
