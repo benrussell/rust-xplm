@@ -1,5 +1,6 @@
 use std::os::raw::*;
 use xplm_sys;
+//use crate::debugln;
 
 use std::ffi::{CString, NulError};
 
@@ -235,22 +236,47 @@ pub fn draw_string(
     color: &DrawStringColor, 
     left: i32, bottom: i32, 
     value: &str,  
-    word_wrap_width: i32
 ) -> Result<(), NulError> {
 
     let value_c = CString::new(value)?;
-     
+
+    // Word-wrap support has been omitted because it's trash.
+    // 1 - does not report actual wrapped width
+    // 2 - does not report how many times wrap was applied
+    // 3 - does not report height of new lines
+    // 4 - support requires ugly if-tree
+    // 5 - taking a 0 for no wrapping and returning a 0 for no wrapping applied is not rustic.
+
     unsafe{
         xplm_sys::XPLMDrawString( 
             color.as_array().as_ptr() as *mut f32,
             left, 
-            bottom, 
+            bottom,
             value_c.as_bytes_with_nul().as_ptr() as *mut i8,
-            word_wrap_width as *mut i32,
+            0 as *mut i32, //word wrap arg is forced to a safe value
             xplm_sys::xplmFont_Proportional as i32,             
         );
-    }
+    }    
 
     Ok(())
+}
 
+
+
+pub fn measure_string( 
+    value: &str,  
+    //num_chars: i32
+) -> Result<f32, NulError> {
+
+    let value_c = CString::new(value)?;
+
+    let pixels: f32 = unsafe{
+        xplm_sys::XPLMMeasureString( 
+            xplm_sys::xplmFont_Proportional as i32,             
+            value_c.as_bytes_with_nul().as_ptr() as *mut i8,
+            value.len() as i32,            
+        )
+    };
+
+    Ok(pixels)
 }
