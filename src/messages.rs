@@ -78,46 +78,36 @@ pub trait XPlaneMessageFilter: crate::plugin::Plugin {
 
     // https://developer.x-plane.com/sdk/XPLMPlugin/#XPLM_MSG_PLANE_CRASHED
     
-    fn msg_plane_crashed(&mut self){
-        // param ignored
-    }
+    fn msg_plane_crashed(&mut self); // param ignored
+    
 
     #[allow(unused_variables)]
     fn msg_plane_loaded(&mut self, param: u32){
         // param is index of plane being loaded
     }
 
-    fn msg_airport_loaded(&mut self){
-        // param ignored
-    }
+    fn msg_airport_loaded(&mut self); // param ignored
 
-    fn msg_scenery_loaded(&mut self){
-        // param ignored
-        // Use datarefs to determine the new scenery files that were loaded.
-    }
+    // Use datarefs to determine the new scenery files that were loaded.
+    fn msg_scenery_loaded(&mut self); // param ignored
 
-    fn msg_airplane_count_changed(&mut self){
-        // param ignored
-        // This message is sent whenever the user adjusts the number of X-Plane aircraft models. 
-        // You must use XPLMCountPlanes to find out how many planes are now available. 
-        // This message will only be sent in XP7 and higher because in XP6 the number of aircraft is not user-adjustable.         
-    }
+    // This message is sent whenever the user adjusts the number of X-Plane aircraft models. 
+    // You must use XPLMCountPlanes to find out how many planes are now available. 
+    // This message will only be sent in XP7 and higher because in XP6 the number of aircraft is not user-adjustable.         
+    fn msg_airplane_count_changed(&mut self); // param ignored
 
+    // The parameter contains the index number of the plane being unloaded; 0 indicates the user’s plane. 
+    // The parameter is of type int, passed as the value of the pointer. 
+    // (That is: the parameter is an int, not a pointer to an int.)
     #[allow(unused_variables)]
     fn msg_plane_unloaded(&mut self, param: u32 ){
-        // param is int value
-        // The parameter contains the index number of the plane being unloaded; 0 indicates the user’s plane. 
-        // The parameter is of type int, passed as the value of the pointer. 
-        // (That is: the parameter is an int, not a pointer to an int.)
+        // param is int value        
     }
 
-    fn msg_will_write_prefs(&mut self){
-        // param ignored
-    }
+    fn msg_will_write_prefs(&mut self); // param ignored
 
-    
-    #[allow(unused_variables)]
     // This function retrieves the livery data as strings from the X-Plane datarefs.
+    #[allow(unused_variables)]
     fn prepare_msg_livery_loaded(&mut self, param: u32){
         // This message is sent to your plugin right after a livery is loaded for an airplane. 
         // You can use this to check the new livery (via datarefs) and react accordingly. 
@@ -135,23 +125,16 @@ pub trait XPlaneMessageFilter: crate::plugin::Plugin {
         self.msg_livery_loaded( param, livery_index, &livery_path );
     }
 
+    // This is called by prepare_msg_livery_loaded(...)
     fn msg_livery_loaded(&mut self, param: u32, livery_index: u32, livery_path: &str);
 
+    fn msg_entered_vr(&mut self); // param ignored
 
+    fn msg_exiting_vr(&mut self); // param ignored
 
-    fn msg_entered_vr(&mut self){
-        // param ignored
-    }
-
-    fn msg_exiting_vr(&mut self){
-        // param ignored
-    }
-
-    fn msg_release_planes(&mut self){
+    fn msg_release_planes(&mut self); // param ignored
         //multiplayer interop function..
-        // param ignored
-    }
-
+        
     #[allow(unused_variables)]
     fn msg_fmod_bank_loaded(&mut self, param: u32){
         // The parameter is the XPLMBankID enum in XPLMSound.h, 0 for the master bank and 1 for the radio bank.
