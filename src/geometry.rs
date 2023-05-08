@@ -20,6 +20,18 @@ pub struct Rect<N> {
 }
 
 impl<N> Rect<N> {
+
+    /// Creates a rectangle from left, top, right, and bottom coordinates
+    /// X-Plane usese bottom left 0,0 so this feels more natural.
+    pub fn from_left_bottom_right_top(left: N, bottom: N, right: N, top: N) -> Self {
+        Rect {
+            top,
+            bottom,
+            left,
+            right,
+        }
+    }
+
     /// Creates a rectangle from left, top, right, and bottom coordinates
     pub fn from_left_top_right_bottom(left: N, top: N, right: N, bottom: N) -> Self {
         Rect {
@@ -40,10 +52,18 @@ impl<N> Rect<N> {
             right,
         }
     }
+
+    /// Consumes this rectangle and returns its left, top, bottom, and right coordinates
+    /// X-Plane is bottom left 0,0 origin.
+    pub fn into_left_bottom_right_top(self) -> (N, N, N, N) {
+        (self.left, self.bottom, self.right, self.top)
+    }
+
     /// Consumes this rectangle and returns its left, top, bottom, and right coordinates
     pub fn into_left_top_bottom_right(self) -> (N, N, N, N) {
         (self.left, self.top, self.bottom, self.right)
     }
+
 
     pub fn set_top(&mut self, top: N) {
         self.top = top;
