@@ -4,6 +4,8 @@ use xplm_sys;
 
 use std::ffi::{CString, NulError};
 
+use crate::geometry::Rect;
+
 /// A callback that can be called while X-Plane draws graphics
 pub trait DrawCallback: 'static {
     /// Draws
@@ -200,40 +202,57 @@ pub fn generate_texture_number() -> i32 {
 }
 
 
-// FIXME: Prototype wrapper. Probably needs refactor to be more idiomatic.
-pub struct DarkBoxBounds{
-    pub left: i32,
-    pub bottom: i32,
-    pub top: i32,
-    pub right: i32
-}
 
-pub fn draw_translucent_dark_box( bounds: DarkBoxBounds ){
+pub fn draw_translucent_dark_box<R: Into<Rect<i32>>>( bounds: R ){
+    let bounds = bounds.into();
     unsafe{
-        xplm_sys::XPLMDrawTranslucentDarkBox( bounds.left, bounds.top, bounds.right, bounds.bottom );
+        xplm_sys::XPLMDrawTranslucentDarkBox( bounds.left(), bounds.top(), bounds.right(), bounds.bottom() );
     }
 }
 
 
-
 // FIXME: Prototype wrapper. Probably needs refactor to be more idiomatic.
 
-pub struct DrawStringColor {
-    pub red: f32,
-    pub green: f32,
-    pub blue: f32,
-    //a: f32,
+pub struct Color {
+    red: f32,
+    green: f32,
+    blue: f32,
+    alpha: f32,
 }
 
-impl DrawStringColor{
-    fn as_array( &self ) -> [f32; 3]{
+#[allow(dead_code)]
+impl Color{
+    pub fn from_rgb( red: f32, green: f32, blue: f32 ) -> Color{
+        Color{ red, green, blue, alpha:1.0 }
+    }
+    pub fn from_rgba( red: f32, green: f32, blue: f32, alpha: f32 ) -> Color{
+        Color{ red, green, blue, alpha }
+    }
+    
+    pub fn set_red(&mut self, new: f32){
+        self.red = new;
+    }
+    pub fn set_green(&mut self, new: f32){
+        self.red = new;
+    }
+    pub fn set_blue(&mut self, new: f32){
+        self.red = new;
+    }
+    pub fn set_alpha(&mut self, new: f32){
+        self.red = new;
+    }
+
+    fn as_array_rgb( &self ) -> [f32; 3]{
         [self.red, self.green, self.blue]
+    }
+    fn as_array_rgba( &self ) -> [f32; 4]{
+        [self.red, self.green, self.blue, self.alpha]
     }
 }
 
 /// Font ID is forced to XPSDK proportional font.
 pub fn draw_string( 
-    color: &DrawStringColor, 
+    color: &Color, 
     left: i32, bottom: i32, 
     value: &str,  
 ) -> Result<(), NulError> {
@@ -249,7 +268,7 @@ pub fn draw_string(
 
     unsafe{
         xplm_sys::XPLMDrawString( 
-            color.as_array().as_ptr() as *mut f32,
+            color.as_array_rgb().as_ptr() as *mut f32,
             left, 
             bottom,
             value_c.as_bytes_with_nul().as_ptr() as *mut i8,
