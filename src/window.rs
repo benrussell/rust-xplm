@@ -138,7 +138,7 @@ impl Window {
 
         match options.title{
             Some(title) => unsafe { 
-                let value_c = CString::new(title).expect("Invalid title."); //FIXME: better error handler
+                let value_c = CString::new(title).unwrap_or(  CString::new("Invalid Window Title CString").unwrap() );
                 xplm_sys::XPLMSetWindowTitle(
                     window_id, 
                     value_c.as_bytes_with_nul().as_ptr() as *mut i8 
