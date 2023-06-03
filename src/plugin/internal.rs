@@ -1,7 +1,7 @@
 use std::os::raw::{c_char, c_int};
 use std::panic;
 use std::panic::AssertUnwindSafe;
-use std::ptr;
+use std::ptr; //::{self, addr_of};
 
 use super::super::debugln;
 use super::super::internal::copy_to_c_buffer;
@@ -55,7 +55,7 @@ where
         copy_to_c_buffer(info.description.clone(), description);
         copy_to_c_buffer(info.signature.clone(), signature);
 
-        match P::start( info ) {
+        let retval = match P::start( info ) {
             Ok(plugin) => {
                 let plugin_box = Box::new(plugin);
                 data.plugin = Box::into_raw(plugin_box);
@@ -66,7 +66,14 @@ where
                 data.plugin = ptr::null_mut();
                 0
             }
-        }
+        };
+
+        // Pass the raw plugin pointer into itself so we can interop with C APIs and callbacks??
+        (*data.plugin).register_ptr( data.plugin as usize );
+
+
+        return retval;
+
     }));
     unwind.unwrap_or_else(|_| {
         debugln!("Panic in XPluginStart");
@@ -158,12 +165,18 @@ where
     if !data.panicked {
         let unwind = panic::catch_unwind(AssertUnwindSafe(|| {
             
-            let plugin = &mut (*data.plugin);
+            // let plugin = &mut (*data.plugin);
             
-            let from: xplm_sys::XPLMPluginID = from as xplm_sys::XPLMPluginID;
-            let message: i32 = message as i32;
+            // let from: xplm_sys::XPLMPluginID = from as xplm_sys::XPLMPluginID;
+            // let message: i32 = message as i32;
             
-            plugin.rx_message(from, message, param);        
+            // plugin.rx_message(from, message, param);
+
+
+
+            // debugln!("rust-xplm: rx_msg: data.plugin: {:?}", (*data).plugin);
+
+            (*data.plugin).rx_message(from, message, param);
 
         }));
         if unwind.is_err() {

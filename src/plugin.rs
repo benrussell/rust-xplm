@@ -1,5 +1,7 @@
 //use crate::debugln;
 
+use crate::debugln;
+
 /// Accessing and communicating with other plugins
 pub mod management;
 
@@ -59,5 +61,12 @@ pub trait Plugin: Sized {
         from: xplm_sys::XPLMPluginID,
         message: i32,
         param: *mut ::std::os::raw::c_void){}
+
+
+
+    fn register_ptr(&mut self, plugin_ptr: usize ){
+        debugln!("rust-xplm: register_ptr: {:?}", plugin_ptr);
+
+    }
     
 }
