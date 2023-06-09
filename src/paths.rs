@@ -37,7 +37,7 @@ pub fn player_aircraft_folder() -> String{
     let acf_path = AircraftPath::from_id(0);
     // crate::debugln!("rust-xplm: player_aircraft_folder: {:?}", acf_path);
 
-    acf_path.folder
+    acf_path.folder()
 }
 
 
@@ -76,4 +76,16 @@ impl AircraftPath{
             folder: folder, 
         }
     }
+
+
+    pub fn filename(&self) -> String{
+        self.filename.clone()
+    }
+
+
+    pub fn folder(&self) -> String{
+        self.folder.clone()
+    }
+
+
 }
