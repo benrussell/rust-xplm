@@ -1,6 +1,6 @@
 
 use ffi::StringBuffer;
-use xplm_sys::XPLMGetSystemPath;
+use xplm_sys::{XPLMGetSystemPath, XPLMGetNthAircraftModel};
 //use std::ffi::{CString, NulError};
 //use std::string::FromUtf8Error;
 
@@ -29,4 +29,51 @@ pub fn xplane_folder() -> String{
 
 pub fn plugins_folder() -> String{
     xplane_folder() + "Resources/plugins/"
+}
+
+
+
+pub fn player_aircraft_folder() -> String{
+    let acf_path = AircraftPath::from_id(0);
+    // crate::debugln!("rust-xplm: player_aircraft_folder: {:?}", acf_path);
+
+    acf_path.folder
+}
+
+
+
+#[derive(Debug)]
+pub struct AircraftPath{
+    filename: String,
+    folder: String,
+}
+
+impl AircraftPath{
+    pub fn from_id( id: i32 ) -> Self{
+
+        // https://developer.x-plane.com/sdk/XPLMGetNthAircraftModel/
+
+        let mut buffer_filename = StringBuffer::new(256);
+        let mut buffer_folder = StringBuffer::new(512);
+
+        unsafe{
+            XPLMGetNthAircraftModel(
+                id,
+                buffer_filename.as_mut_ptr(),
+                buffer_folder.as_mut_ptr(),
+            );
+        }
+
+        // X-Plane includes the filename in the folder data returned so we need
+        // to remove it.
+
+        let filename = buffer_filename.into_string().unwrap();
+        let folder = buffer_folder.into_string().unwrap();
+        let folder = folder.replace(&filename, "");
+
+        AircraftPath { 
+            filename: filename, 
+            folder: folder, 
+        }
+    }
 }
