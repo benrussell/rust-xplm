@@ -10,6 +10,8 @@ use std::ffi::CString;
 mod ffi;
 /// Path conversion
 pub mod paths;
+/// Player aircraft selection, location, airport.
+pub mod player;
 /// Plugin macro
 mod plugin_macro;
 

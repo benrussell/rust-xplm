@@ -88,4 +88,20 @@ impl AircraftPath{
     }
 
 
+    /// Full path of aircraft file - x-plane folder..
+    pub fn relative_filename(&self) -> String{
+        //we need a relative filename for XPLMSetUsersAircraft
+
+        let xp_folder = xplane_folder();
+
+        //turn acf_folder into xp relative folder..
+        let mut acf_folder = self.folder().as_bytes().to_vec();
+        let acf_folder = acf_folder.split_off(xp_folder.len());
+        let acf_folder = String::from_utf8(acf_folder).unwrap();
+
+        format!("{acf_folder}{}", self.filename())
+
+    }
+
+
 }
